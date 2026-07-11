@@ -1,0 +1,2 @@
+Decisão 001 – Preservação dos dados na camada Bronze
+A camada Bronze armazenará os dados exatamente como retornados pelas consultas SQL oficiais da Base dos Dados, sem remoção de colunas ou aplicação de regras de negócio. Transformações, filtros e seleção de atributos serão realizados apenas nas camadas Silver e Gold.
