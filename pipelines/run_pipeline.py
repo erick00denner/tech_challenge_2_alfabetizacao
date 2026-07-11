@@ -8,15 +8,24 @@ Responsabilidades
 - Coordenar a execução completa da pipeline.
 """
 
+
 from pipelines.config import (
     DATASETS,
     SQL_DIR,
     BRONZE_DIR,
     SILVER_DIR,
+    GOLD_DIR,
+
 )
 
 from pipelines.ingest.download_dataset import download_dataset
+
 from pipelines.silver.transform_dataset import transform_dataset
+
+from pipelines.gold.build_indicador_municipio import build_indicador_municipio
+from pipelines.gold.build_comparativo_metas import build_comparativo_metas
+from pipelines.gold.build_evolucao_temporal import build_evolucao_temporal
+from pipelines.gold.build_alunos_modelagem import build_alunos_modelagem
 
 
 def run_bronze() -> None:
@@ -32,6 +41,7 @@ def run_bronze() -> None:
     print("=" * 60)
     print("PIPELINE BRONZE")
     print("=" * 60)
+    print()
 
     for dataset in DATASETS:
 
@@ -63,6 +73,7 @@ def run_silver() -> None:
     print("=" * 60)
     print("PIPELINE SILVER")
     print("=" * 60)
+    print()
 
     for dataset in DATASETS:
 
@@ -80,6 +91,70 @@ def run_silver() -> None:
         )
 
 
+def run_gold() -> None:
+    """
+    Executa a construção dos datasets analíticos da camada Gold.
+    """
+
+    print()
+    print("=" * 60)
+    print("PIPELINE GOLD")
+    print("=" * 60)
+
+    # ------------------------------------------------------------
+    # Indicador por município
+    # ------------------------------------------------------------
+
+    print()
+    print("Construindo indicador_municipio.parquet...")
+
+    build_indicador_municipio(
+        municipio_file=SILVER_DIR / "municipio.parquet",
+        meta_file=SILVER_DIR / "meta_alfabetizacao_municipio.parquet",
+        output_file=GOLD_DIR / "indicador_municipio.parquet",
+    )
+
+    # ------------------------------------------------------------
+    # Comparativo de metas
+    # ------------------------------------------------------------
+
+    print()
+    print("Construindo comparativo_metas.parquet...")
+
+    build_comparativo_metas(
+        brasil_file=SILVER_DIR / "meta_alfabetizacao_brasil.parquet",
+        uf_file=SILVER_DIR / "meta_alfabetizacao_uf.parquet",
+        municipio_file=SILVER_DIR / "meta_alfabetizacao_municipio.parquet",
+        output_file=GOLD_DIR / "comparativo_metas.parquet",
+    )
+
+    # ------------------------------------------------------------
+    # Evolução temporal
+    # ------------------------------------------------------------
+
+    print()
+    print("Construindo evolucao_temporal.parquet...")
+
+    build_evolucao_temporal(
+        brasil_file=SILVER_DIR / "meta_alfabetizacao_brasil.parquet",
+        uf_file=SILVER_DIR / "uf.parquet",
+        municipio_file=SILVER_DIR / "municipio.parquet",
+        output_file=GOLD_DIR / "evolucao_temporal.parquet",
+    )
+
+    # ------------------------------------------------------------
+    # Alunos para modelagem
+    # ------------------------------------------------------------
+
+    print()
+    print("Construindo alunos_modelagem.parquet...")
+
+    build_alunos_modelagem(
+        alunos_file=SILVER_DIR / "alunos.parquet",
+        indicador_file=GOLD_DIR / "indicador_municipio.parquet",
+        output_file=GOLD_DIR / "alunos_modelagem.parquet",
+    )
+
 def main() -> None:
     """
     Executa toda a pipeline do projeto.
@@ -94,6 +169,8 @@ def main() -> None:
     run_bronze()
 
     run_silver()
+
+    run_gold()
 
     print()
     print("=" * 60)

@@ -28,6 +28,8 @@ BRONZE_DIR = BASE_DIR / "data" / "bronze"
 
 SILVER_DIR = BASE_DIR / "data" / "silver"
 
+GOLD_DIR = BASE_DIR / "data" / "gold"
+
 # ============================================================================
 # Configuração dos datasets da camada Bronze
 # ============================================================================
@@ -76,3 +78,4 @@ DATASETS = [
         "key": ["ano", "id_aluno"],
     },
 ]
+
