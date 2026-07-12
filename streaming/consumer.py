@@ -15,6 +15,7 @@ from pathlib import Path
 
 from streaming.update_gold import update_indicador
 
+from pipelines.config import GOLD_DIR
 
 def consumir_eventos() -> None:
     """
@@ -22,6 +23,8 @@ def consumir_eventos() -> None:
     """
 
     consumer = create_consumer()
+
+    gold_path = GOLD_DIR / "indicador_municipio.parquet"
 
     print()
     print("=" * 70)
@@ -45,7 +48,7 @@ def consumir_eventos() -> None:
 
             update_indicador(
                 evento,
-                Path("data/gold/indicador_municipio.parquet"),
+                Path(gold_path),
             )
 
             print(

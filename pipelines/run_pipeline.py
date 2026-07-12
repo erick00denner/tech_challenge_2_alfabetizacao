@@ -158,12 +158,6 @@ def run_gold() -> None:
 def main() -> None:
     """
     Executa toda a pipeline do projeto.
-
-    Fluxo atual:
-
-    Bronze
-        ↓
-    Silver
     """
 
     run_bronze()

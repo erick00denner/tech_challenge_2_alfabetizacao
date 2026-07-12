@@ -7,6 +7,9 @@
 #
 # pip install -r requirements.txt
 
+# Base de dados
+basedosdados>=2.0.3
+
 # Manipulação de dados
 pandas>=2.2.0
 numpy>=2.0.0

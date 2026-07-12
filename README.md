@@ -19,21 +19,23 @@ Embora desenvolvida como parte do Tech Challenge da FIAP, a arquitetura foi conc
 
 ## Sumário
 
-- Sobre o Projeto
-- Principais Capacidades
-- Objetivos
-- Arquitetura da Solução
-- Pipeline Batch
-- Pipeline Streaming
-- Camada Quality
-- Estrutura do Projeto
-- Arquitetura Cloud
-- Estratégia FinOps
-- Aplicações em BI e IA
-- Tecnologias
-- Como Executar
-- Resultados
-- Conclusão
+- [Sobre o Projeto](#sobre-o-projeto)
+- [Principais Capacidades](#principais-capacidades-da-solução)
+- [Objetivos](#objetivos)
+- [Arquitetura da Solução](#arquitetura-da-solução)
+- [Pipeline Batch](#pipeline-batch)
+- [Pipeline Streaming](#pipeline-streaming)
+- [Camada Quality](#camada-quality)
+- [Monitoramento da Pipeline](#monitoramento-da-pipeline)
+- [Estrutura do Projeto](#estrutura-do-projeto)
+- [Arquitetura Cloud](#arquitetura-cloud)
+- [Decisões Arquiteturais](#decisões-arquiteturais)
+- [Estratégia FinOps](#estratégia-finops)
+- [Aplicações em BI e IA](#aplicações-em-bi-e-inteligência-artificial)
+- [Tecnologias](#tecnologias-utilizadas)
+- [Como Executar](#como-executar)
+- [Resultados](#resultados-obtidos)
+- [Conclusão](#conclusão)
 
 ## Principais Capacidades da Solução
 
@@ -196,6 +198,32 @@ Ao final da execução, um relatório consolidado apresenta o status de validaç
 
 ---
 
+# Monitoramento da Pipeline
+
+Embora o monitoramento completo seja um item opcional do desafio, a solução já incorpora mecanismos básicos de observabilidade que dão visibilidade sobre a execução da pipeline, servindo como base para uma futura estratégia de monitoramento em produção.
+
+## O que já é monitorado
+
+- **Falhas de ingestão**: cada etapa da camada Bronze é protegida por tratamento de exceção em `download_dataset.py`, que interrompe a pipeline e reporta o dataset que falhou, evitando que uma falha silenciosa comprometa as camadas seguintes.
+- **Volume de dados processados**: a cada execução, `transform_dataset.py` e os scripts da camada Gold reportam quantidade de registros, colunas e duplicados de chave processados em cada dataset.
+- **Qualidade dos dados**: a camada `quality/` consolida, ao final da execução, um relatório com o status (OK / falha) de cada dataset nas três camadas, permitindo identificar rapidamente qual etapa apresentou inconsistência.
+- **Falhas no consumo de eventos**: o consumer Kafka (`streaming/consumer.py`) captura e reporta erros de mensagens (`msg.error()`) sem interromper o processamento dos demais eventos.
+
+## Evolução proposta para ambiente Cloud
+
+Em um ambiente de produção, a estratégia de monitoramento evoluiria para:
+
+| Necessidade | Solução proposta |
+|---|---|
+| Centralização de logs | Amazon CloudWatch Logs, com os prints estruturados atuais migrando para logging estruturado (JSON) |
+| Latência do pipeline | Métricas customizadas no CloudWatch a partir do tempo de execução de cada camada (Bronze/Silver/Gold) |
+| Alertas de erro | CloudWatch Alarms + SNS para notificação em caso de falha de ingestão ou reprovação na camada Quality |
+| Lag do consumer Kafka | Monitoramento de consumer lag via métricas nativas do Amazon MSK |
+
+Essa abordagem incremental permite que a observabilidade evolua junto com a maturidade da plataforma, sem exigir reestruturação da pipeline atual.
+
+---
+
 # Estrutura do Projeto
 
 A organização do projeto foi planejada para manter baixo acoplamento entre os componentes, facilitar manutenção e permitir evolução independente de cada módulo.
@@ -282,6 +310,20 @@ Bronze / Silver / Gold"]
 ```
 
 Essa arquitetura preserva a separação entre processamento Batch e Streaming, permitindo que ambos evoluam de forma independente enquanto compartilham a mesma camada analítica.
+
+---
+
+# Decisões Arquiteturais
+
+Ao longo do desenvolvimento, algumas decisões exigiram avaliar trade-offs entre abordagens distintas. As principais são resumidas a seguir (o detalhamento completo está em `docs/DECISIONS.md`).
+
+## Batch vs Streaming
+
+Optou-se por uma arquitetura híbrida em vez de escolher apenas uma abordagem. O Batch é responsável pela carga inicial e consolidação histórica (mais eficiente para grandes volumes processados periodicamente), enquanto o Streaming atualiza a camada Gold de forma incremental, evitando reprocessamentos completos a cada nova medição. O custo dessa escolha é a complexidade adicional de manter dois fluxos coordenados, mitigada pela configuração centralizada e por camadas desacopladas.
+
+## Data Lake vs Data Warehouse
+
+A solução adota um Data Lake baseado em arquivos Parquet organizados pela Arquitetura Medalhão, em vez de um Data Warehouse tradicional. Essa escolha prioriza flexibilidade de schema, menor custo de armazenamento e compatibilidade direta com ferramentas de Machine Learning, em detrimento de recursos nativos de um DW (como indexação e otimização automática de queries). Para consumo por BI, a camada Gold cumpre um papel equivalente ao de um DW analítico, sem o custo operacional de manter um cluster dedicado.
 
 ---
 
@@ -428,7 +470,7 @@ docker compose up -d
 ## 5. Executar o pipeline Batch
 
 ```bash
-python run_pipeline.py
+python -m pipelines.run_pipeline
 ```
 
 Essa etapa realiza a construção das camadas Bronze, Silver e Gold.
@@ -450,13 +492,13 @@ Ao final da execução será apresentado um relatório consolidado contendo a va
 Inicializar o consumidor:
 
 ```bash
-python run_consumer.py
+python -m streaming.run_consumer
 ```
 
 Em outro terminal, publicar eventos:
 
 ```bash
-python run_streaming.py
+python -m streaming.run_streaming
 ```
 
 O Consumer processará os eventos recebidos e realizará a atualização incremental da camada Gold.
