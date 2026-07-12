@@ -11,6 +11,10 @@ import json
 
 from streaming.kafka_config import create_consumer
 
+from pathlib import Path
+
+from streaming.update_gold import update_indicador
+
 
 def consumir_eventos() -> None:
     """
@@ -38,6 +42,11 @@ def consumir_eventos() -> None:
                 continue
 
             evento = json.loads(msg.value().decode("utf-8"))
+
+            update_indicador(
+                evento,
+                Path("data/gold/indicador_municipio.parquet"),
+            )
 
             print(
                 f"""

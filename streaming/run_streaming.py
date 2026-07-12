@@ -1,34 +1,49 @@
 """
-Pipeline de Streaming.
+Executa uma simulação completa de streaming.
 
-Executa:
-
-Simulador
-
-↓
-
-Producer
+Fluxo
+-----
+1. Carrega o dataset indicador_municipio.
+2. Gera eventos simulados.
+3. Exibe um resumo da simulação.
+4. Publica os eventos no Kafka.
 """
+
+from __future__ import annotations
 
 from pathlib import Path
 
-from streaming.producer import publicar_evento
-from streaming.simulator import gerar_eventos
+import pandas as pd
+
+from streaming.producer import publish_events
+from streaming.simulator import (
+    gerar_eventos,
+    imprimir_resumo,
+)
 
 
-def main():
+def main() -> None:
+    """
+    Executa uma simulação completa.
+    """
 
-    print("=" * 60)
-    print("STREAMING")
-    print("=" * 60)
+    base_path = Path(__file__).resolve().parents[1]
 
-    eventos = gerar_eventos(
-        Path("data/silver/municipio.parquet")
+    indicador = pd.read_parquet(
+        base_path
+        / "data"
+        / "gold"
+        / "indicador_municipio.parquet"
     )
 
-    for evento in eventos:
+    eventos = gerar_eventos(
+        indicador,
+        quantidade=10,
+    )
 
-        publicar_evento(evento)
+    imprimir_resumo(eventos)
+
+    publish_events(eventos)
 
 
 if __name__ == "__main__":
