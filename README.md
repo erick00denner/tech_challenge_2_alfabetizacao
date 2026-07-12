@@ -69,6 +69,7 @@ Os principais objetivos do projeto são:
 
 # Arquitetura da Solução
 
+```mermaid
 flowchart TB
 
     INEP["📊 Dados Públicos (INEP)"]
@@ -95,6 +96,7 @@ flowchart TB
 
     GOLD --> BI["📈 Power BI"]
     GOLD --> IA["🤖 Inteligência Artificial"]
+```
 
 A solução adota uma arquitetura híbrida de processamento de dados, combinando pipelines Batch e Streaming que operam de forma independente e convergem para uma única camada analítica.
 
@@ -103,6 +105,7 @@ O processamento Batch é responsável pela construção inicial das camadas Bron
 Em paralelo, o pipeline Streaming utiliza Apache Kafka para processar novos eventos e atualizar incrementalmente a camada Gold, reduzindo a necessidade de reprocessamentos completos e aproximando a solução de arquiteturas modernas orientadas a eventos.
 
 Essa abordagem permite combinar a robustez do processamento Batch com a agilidade do processamento Streaming, disponibilizando dados atualizados para ferramentas analíticas sem comprometer a eficiência operacional.
+
 ---
 
 # Pipeline Batch
@@ -246,6 +249,7 @@ A solução é composta por dois pipelines independentes — Batch e Streaming �
 
 O pipeline Batch é responsável pela construção inicial do Data Lake, enquanto o pipeline Streaming realiza atualizações incrementais dos indicadores analíticos em tempo quase real.
 
+```mermaid
 flowchart TB
 
     INEP["📊 Dados Públicos"]
@@ -275,7 +279,7 @@ Bronze / Silver / Gold"]
 
     GOLD --> BI
     GOLD --> SM
-
+```
 
 Essa arquitetura preserva a separação entre processamento Batch e Streaming, permitindo que ambos evoluam de forma independente enquanto compartilham a mesma camada analítica.
 
@@ -341,6 +345,7 @@ A solução foi desenvolvida utilizando tecnologias amplamente empregadas em pro
 
 # Como Executar
 
+```mermaid
 flowchart LR
 
     A["run_pipeline.py"]
@@ -372,6 +377,7 @@ flowchart LR
     F --> I
 
     D --> I
+```
 
 ## 1. Clonar o repositório
 
