@@ -14,6 +14,7 @@ certifi==2026.6.17
 cffi==2.1.0
 charset-normalizer==3.4.9
 comm==0.2.3
+confluent-kafka==2.15.0
 cryptography==49.0.0
 db-dtypes==1.7.1
 debugpy==1.8.21

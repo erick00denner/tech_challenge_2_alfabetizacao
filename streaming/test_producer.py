@@ -1,30 +1,22 @@
 from pathlib import Path
 
-from streaming.producer import publicar_evento
-from streaming.simulator import (
-    gerar_eventos,
-    imprimir_resumo,
+import pandas as pd
+
+from streaming.producer import publish_events
+from streaming.simulator import gerar_eventos
+
+BASE_PATH = Path(__file__).resolve().parents[1]
+
+indicador = pd.read_parquet(
+    BASE_PATH
+    / "data"
+    / "gold"
+    / "indicador_municipio.parquet"
 )
 
+eventos = gerar_eventos(
+    indicador,
+    quantidade=10,
+)
 
-def main():
-
-    eventos = gerar_eventos(
-        Path("data/silver/municipio.parquet")
-    )
-
-    imprimir_resumo(eventos)
-
-    print()
-
-    print("=" * 70)
-    print("PUBLICANDO EVENTOS")
-    print("=" * 70)
-
-    for evento in eventos:
-
-        publicar_evento(evento)
-
-
-if __name__ == "__main__":
-    main()
+publish_events(eventos)

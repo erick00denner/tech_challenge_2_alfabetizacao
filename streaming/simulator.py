@@ -10,26 +10,22 @@ import uuid
 import numpy as np
 import pandas as pd
 
-from streaming.kafka_config import (
-    EVENTS_PER_EXECUTION,
-    RANDOM_SEED,
-)
+RANDOM_SEED = 42
 
 np.random.seed(RANDOM_SEED)
 
 
 def gerar_eventos(
-    municipio_file: Path,
+    indicador: pd.DataFrame,
+    quantidade: int = 10,
 ) -> list[dict]:
     """
     Gera eventos simulados de atualização da média de
     proficiência em Português.
     """
 
-    municipio = pd.read_parquet(municipio_file)
-
-    amostra = municipio.sample(
-        EVENTS_PER_EXECUTION,
+    amostra = indicador.sample(
+        n=quantidade,
         random_state=RANDOM_SEED,
     )
 
