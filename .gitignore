@@ -5,6 +5,7 @@ venv/
 # Python
 __pycache__/
 *.py[cod]
+*.pyo
 
 # Jupyter
 .ipynb_checkpoints/
@@ -12,15 +13,12 @@ __pycache__/
 # VS Code
 .vscode/
 
+# Environment
+.env
+
 # Arquivos do sistema
 .DS_Store
+Thumbs.db
 
-# Dados gerados
-data/bronze/*
-data/silver/*
-data/gold/*
-
-# Mantém a estrutura das pastas
-!data/bronze/.gitkeep
-!data/silver/.gitkeep
-!data/gold/.gitkeep
+# Logs
+*.log
